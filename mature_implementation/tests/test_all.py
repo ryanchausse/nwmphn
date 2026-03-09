@@ -23,4 +23,12 @@ db base -> sqlalchemy ORM declarative_base
 db session -> sqlalchemy create_engine, SessionMaker
 
 NB: repo handles transaction commits/flushing
+
+Layers:
+routes = HTTP request handling, auth, throttling
+session = DB sessions (can connect to RDS proxy for example)
+repo = data access layer via DB session which handles transactions
+service = business logic (domain) layer, pretty fat
+
+model is SQL table model, schema is Pydantic type model
 """
