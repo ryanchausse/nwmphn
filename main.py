@@ -24,18 +24,46 @@ class Thing(BaseModel):
 # Initialise one thing in a thing list (later I'll put this in SQLite or equivalent)
 # Consider using a set() here instead if id will never be a duplicate
 example_things = [Thing(
-    id=0,
-    name="Example Thing",
-    price=13.99,
-    created_at=datetime.now()
+    id = 0,
+    name = "Example Thing",
+    price = 13.99,
+    created_at = datetime.now()
 ),]
 
 # Example: root json response
 @app.get("/")
 def get_root():
-    return {"Hello and welcome!"}
+    return "Hello and welcome!"
 
-# Example: get request for a particular "Thing" object/item
+# Example: find things matching search criteria or list all things
+# TODO: paginate (page/page size or offset/limit)
+# TODO: decide whether to derive searchable fields from enum or to 
+#       define them in each route (whitelist might make the code more
+#       succinct but be vulnerable to oversight / misuse / scale issues)
+# TODO: return results that are LIKE, not equal to, the query params
+@app.get("/things")
+def find_things(
+    id: int | None = None,
+    name: str | None = None,
+    description: str | None = None,
+    created_at: datetime | None = None
+):
+    if all(arg is None for arg in (id, name, description, created_at)):
+        return example_things
+
+    return [
+        x for x in example_things
+        # TODO: fix usage bug where user can supply wrong filtering values
+        #       e.g. correct name and unmatched/wrong id for a single object
+        if (
+            id is not None and x.id == id or
+            name is not None and x.name == name or
+            description is not None and x.description == description or
+            created_at is not None and x.created_at == created_at
+        )
+    ]
+
+# Example: GET request for a particular "Thing" object/item
 @app.get("/thing/{thing_id}")
 def get_thing(thing_id: int):
     search_result = [x for x in example_things if x.id == thing_id]
