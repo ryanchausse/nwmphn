@@ -12,7 +12,6 @@ from typing import Optional
 
 load_dotenv()
 
-print("Starting...")
 app = FastAPI()
 app.mount(path="/static", app=StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -35,6 +34,16 @@ class ThingOut(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
+
+
+# Make all fields optional in the case of PATCH
+# excluding id and updated_at, as this is gotten separately
+class ThingUpdate(BaseModel):
+    name: Optional[str] = None
+    created_at: Optional[datetime] = None
+    price: Optional[float] = None
+    description: Optional[str] = None
+    is_true: Optional[bool] = None
 
 
 # Initialise one thing in a thing list (later I'll put this in SQLite or equivalent)
@@ -73,10 +82,10 @@ def find_things(
         # TODO: fix usage bug where user can supply wrong filtering values
         #       e.g. correct name and unmatched/wrong id for a single object
         if (
-            id is not None and x.id == id or
-            name is not None and x.name == name or
-            description is not None and x.description == description or
-            created_at is not None and x.created_at == created_at
+            (id is not None and x.id == id) or
+            (name is not None and x.name == name) or
+            (description is not None and x.description == description) or
+            (created_at is not None and x.created_at == created_at)
         )
     ]
 
@@ -85,9 +94,9 @@ def find_things(
 def get_thing(thing_id: int):
     search_result = [x for x in example_things if x.id == thing_id]
     if not search_result:
-        return HTTPException(status_code=404, detail="Thing not found")
+        raise HTTPException(status_code=404, detail="Thing not found")
     if len(search_result) > 1:
-        return HTTPException(status_code=500, detail="More than one Thing found")
+        raise HTTPException(status_code=500, detail="More than one Thing found")
     return {
         "id": search_result[0].id,
         "name": search_result[0].name,
@@ -110,15 +119,35 @@ def create_thing(thing: Thing):
     example_things.append(thing)
     return thing
 
-# Example: put request to change a resource (all necessary fields)
+# Example: put request to change a resource (all fields)
+# TODO: decide on status code returned (maybe 204), same for PATCH
 @app.put("/things/{thing_id}", response_model=ThingOut, status_code=200)
 def replace_thing(thing_id: int, thing: Thing):
+    # TODO: maybe optimise this for large datasets (but in a DB-backed
+    #       implementation, this problem wouldn't exist) with next()
+    thing_updated = False
     for existing_thing in example_things:
         if (existing_thing.id == thing_id):
             example_things.remove(existing_thing)
             example_things.append(thing)
-
+            thing_updated = True
+            break
+    if thing_updated:
+        return thing
+    raise HTTPException(status_code=404, detail="Thing not found") 
 
 # Example: patch request to change a resource (only fields that are changing)
-
-print("Done.")
+# TODO: ensure at least one field is being changed, as the ThingUpdate model
+#       does not require it
+# TODO: Respond with a ThingUpdated object enumerating which fields were updated
+@app.patch("/things/{thing_id}", response_model=ThingOut, status_code=200)
+def update_thing(thing_id: int, updated_thing: ThingUpdate):
+    # next() is an iterator, good for large lists
+    thing_to_update = next((existing_thing for existing_thing in example_things if existing_thing.id == thing_id), None)
+    if not thing_to_update:
+        raise HTTPException(status_code=404, detail="Thing for updating not found")
+    data_to_update = updated_thing.model_dump(exclude_unset=True)
+    for field, value in data_to_update.items():
+        setattr(thing_to_update, field, value)
+    thing_to_update.updated_at = datetime.now()
+    return thing_to_update
