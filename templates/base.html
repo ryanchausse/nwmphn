@@ -1,0 +1,16 @@
+<html>
+<head>
+    <title>All Things</title>
+    <link href="{{ url_for('static', path='/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    {% for thing in things %}
+        <h1>{{ thing.name }}</h1>
+        <ul>
+            <li>id: {{ thing.id }}</li>
+            <li>description: {{ thing.description }}</li>
+            <li>created_at: {{ thing.created_at }}</li>
+        </ul>
+    {% endfor %}
+</body>
+</html>

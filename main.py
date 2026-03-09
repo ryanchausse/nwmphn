@@ -2,7 +2,11 @@ import os, json
 from datetime import datetime
 from helper_functions import HelperFunctions
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from jinja2 import Template
 from pydantic import BaseModel
 from typing import Optional
 
@@ -10,6 +14,8 @@ load_dotenv()
 
 print("Starting...")
 app = FastAPI()
+app.mount(path="/static", app=StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 # Define data model with Pydantic
 class Thing(BaseModel):
@@ -78,6 +84,14 @@ def get_thing(thing_id: int):
     }
 
 # Example: get request which returns a Jinja2 template with HTML
+# TODO: apply as an optional argument to the normal "/things" route
+@app.get("/html_things", response_class=HTMLResponse)
+def find_html_things(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="base.html",
+        context={"things": example_things}
+    )
 
 # Example: post request to create a new resource
 
