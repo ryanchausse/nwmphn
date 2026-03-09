@@ -1,2 +1,3 @@
 python-dotenv
-paramiko
+uvicorn[standard]
+fastapi[standard]
