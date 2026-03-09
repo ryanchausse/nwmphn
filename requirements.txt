@@ -2,3 +2,4 @@ python-dotenv
 uvicorn[standard]
 fastapi[standard]
 requests
+sqlalchemy
