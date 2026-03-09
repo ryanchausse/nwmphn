@@ -18,18 +18,29 @@ app.mount(path="/static", app=StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Define data model with Pydantic
+# TODO: make "id" and "created_at" automatically generated in POST route
 class Thing(BaseModel):
     id: int
     name: str
+    created_at: datetime
     price: Optional[float] = None
     description: Optional[str] = None
     is_true: Optional[bool] = None
-    created_at: datetime
     updated_at: Optional[datetime] = None
 
+
+# Define response (minimised / sanitised) model for Thing
+# TODO: review sanitisation for output object
+class ThingOut(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+
+
 # Initialise one thing in a thing list (later I'll put this in SQLite or equivalent)
-# Consider using a set() here instead if id will never be a duplicate
-example_things = [Thing(
+# Consider using a set() here instead if id will never be a duplicate (might not be
+# an issue if constraints are in the DB)
+example_things: list[Thing] = [Thing(
     id = 0,
     name = "Example Thing",
     price = 13.99,
@@ -85,19 +96,29 @@ def get_thing(thing_id: int):
 
 # Example: get request which returns a Jinja2 template with HTML
 # TODO: apply as an optional argument to the normal "/things" route
-@app.get("/html_things", response_class=HTMLResponse)
-def find_html_things(request: Request):
+@app.get("/things_html", response_class=HTMLResponse)
+def find_things_html(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="base.html",
         context={"things": example_things}
     )
 
-# Example: post request to create a new resource
+# Example: POST request to create a new resource (Thing)
+@app.post("/things", response_model=ThingOut, status_code=201)
+def create_thing(thing: Thing):
+    example_things.append(thing)
+    return thing
 
 # Example: put request to change a resource (all necessary fields)
+@app.put("/things/{thing_id}", response_model=ThingOut, status_code=200)
+def replace_thing(thing_id: int, thing: Thing):
+    for existing_thing in example_things:
+        if (existing_thing.id == thing_id):
+            example_things.remove(existing_thing)
+            example_things.append(thing)
+
 
 # Example: patch request to change a resource (only fields that are changing)
 
-print(HelperFunctions.test_function())
 print("Done.")
