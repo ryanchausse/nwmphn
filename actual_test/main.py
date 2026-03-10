@@ -88,12 +88,14 @@ with open('./client_data.csv', newline='') as csvfile:
             )
         except (ValueError, TypeError) as e:
             print(f"There was an error parsing the CSV row into a ClientModel object: {e}")
-        except Exception as e:
-            print(f"Unforeseen error parsing CSV row: {e}")
-        finally:
             print(f"Row data: {row}")
             print("Row skipped.")
-            pass
+            continue
+        except Exception as e:
+            print(f"Unforeseen error parsing CSV row: {e}")
+            print(f"Row data: {row}")
+            print("Row skipped.")
+            continue
 
 # Example: root json response
 @app.get("/")
@@ -134,6 +136,6 @@ def get_client(client_id: int):
 
 # Example: POST request to create a new resource (Client)
 @app.post("/clients", response_model=ClientOutModel, status_code=201)
-def create_thing(client: ClientModel):
+def create_client(client: ClientModel):
     example_clients.append(client)
     return client
