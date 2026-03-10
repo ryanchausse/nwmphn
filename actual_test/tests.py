@@ -4,7 +4,6 @@ import requests
 import uuid
 
 # The goal of this test is to add a new Client via the POST http verb:
-# curl -i -X POST -H 'Content-Type: application/json' -d '{"id": 1, "name": "New Client", "description": "New Client Added By Posting", [etc.]}' http://127.0.0.1:8000/clients
 class TestCreateAClient(unittest.TestCase):
     def test_post_client(self):
         url = "http://127.0.0.1:8000/clients"
@@ -24,6 +23,7 @@ class TestCreateAClient(unittest.TestCase):
             "family_name": "Chausse",
             "forename": "Bryan",
             "phone": "0418759273",
+            "preferred_forename": None
         }
 
         response = requests.post(url, json=client_to_create)
@@ -33,7 +33,7 @@ class TestCreateAClient(unittest.TestCase):
 
 class TestGetAClient(unittest.TestCase):
     def test_get_client(self):
-        client_id = str(1)
+        client_id = str(2)
         url = "http://127.0.0.1:8000/clients/" + client_id
         
         expected_client_response = {
@@ -41,6 +41,7 @@ class TestGetAClient(unittest.TestCase):
             "family_name": "Chausse",
             "forename": "Bryan",
             "phone": "0418759273",
+            "preferred_forename": None
         }
 
         response = requests.get(url)

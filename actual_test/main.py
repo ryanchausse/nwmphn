@@ -10,7 +10,7 @@ app = FastAPI()
 # Ran out of time to add the various constraints (a la [constr(max_length=256)])
 class ClientModel(BaseModel):
     id: int
-    client_key: uuid.uuid4
+    client_key: str # This should be uuid.uuid4
     slk: str
     forename: str
     preferred_forename: Optional[str] = None # This name differs in the model spec
@@ -46,14 +46,14 @@ class ClientOutModel(BaseModel):
 # Read provided sample data into ClientModel(s) and append to list
 # Add one test client (me)
 my_client = ClientModel(
-    "id": 1,
-    "client_key": str(uuid.uuid4()),
-    "slk": "LKE102310",
-    "forename": "Ryan",
-    "family_name": "Chausse",
-    "date_of_birth": "1986-01-01",
-    "intersex": 1,
-    "phone": "0418759273"
+    id=1,
+    client_key=str(uuid.uuid4()),
+    slk="LKE102310",
+    forename="Ryan",
+    family_name="Chausse",
+    date_of_birth="1986-01-01",
+    intersex=1,
+    phone="0418759273"
 )
 example_clients: list[ClientModel] = [my_client,]
 
@@ -82,19 +82,12 @@ with open('./client_data.csv', newline='') as csvfile:
                     suburb=row[16],
                     state=row[17],
                     postcode=row[18],
-                    consent_mail=row[19],
-                    consent_email=row[20],
-                    consent_voice_message=row[21],
-                    consent_sms=row[22],
+                    consent_email=row[19],
+                    consent_sms=row[20],
                 )
             )
-        except (TypeError, ValueError) as e:
-            # Only notify and continue parsing
-            print("There was a problem parsing a row")
-            print(f"Error message: {e}")
-            print(f"Row data: {row}")
-
-
+        except:
+            pass
 # Example: root json response
 @app.get("/")
 def get_root():
@@ -135,6 +128,5 @@ def get_client(client_id: int):
 # Example: POST request to create a new resource (Client)
 @app.post("/clients", response_model=ClientOutModel, status_code=201)
 def create_thing(client: ClientModel):
-    print(client)
     example_clients.append(client)
     return client
