@@ -58,36 +58,43 @@ my_client = ClientModel(
 example_clients: list[ClientModel] = [my_client,]
 
 with open('./client_data.csv', newline='') as csvfile:
-    csv_reader = csv.reader(csvfile)
-    for row in csv_reader:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
         try:
             example_clients.append(
                 ClientModel(
-                    id=row[0],
-                    client_key=row[1],
-                    slk=row[2],
-                    forename=row[3],
-                    preferred_forename=row[4],
-                    family_name=row[5],
-                    pronoun=row[6],
-                    date_of_birth=row[7],
-                    gender=row[8],
-                    intersex=row[9],
-                    sexual_orientation=row[10],
-                    indigenous_status=row[11],
-                    country_of_birth=row[12],
-                    main_lang_at_home=row[13],
-                    phone=row[14],
-                    email=row[15],
-                    suburb=row[16],
-                    state=row[17],
-                    postcode=row[18],
-                    consent_email=row[19],
-                    consent_sms=row[20],
+                    id=row["id"],
+                    client_key=row["client_key"],
+                    slk=row["slk"],
+                    forename=row["forename"],
+                    preferred_forename=row["preferred_forename"],
+                    family_name=row["family_name"],
+                    pronoun=row["pronoun"],
+                    date_of_birth=row["date_of_birth"],
+                    gender=row["gender"],
+                    intersex=row["intersex"],
+                    sexual_orientation=row["sexual_orientation"],
+                    indigenous_status=row["indigenous_status"],
+                    country_of_birth=row["country_of_birth"],
+                    main_lang_at_home=row["main_lang_at_home"],
+                    phone=row["phone"],
+                    email=row["email"],
+                    suburb=row["suburb"],
+                    state=row["state"],
+                    postcode=row["postcode"],
+                    consent_email=row["consent_email"],
+                    consent_sms=row["consent_sms"],
                 )
             )
-        except:
+        except (ValueError, TypeError) as e:
+            print(f"There was an error parsing the CSV row into a ClientModel object: {e}")
+        except Exception as e:
+            print(f"Unforeseen error parsing CSV row: {e}")
+        finally:
+            print(f"Row data: {row}")
+            print("Row skipped.")
             pass
+
 # Example: root json response
 @app.get("/")
 def get_root():

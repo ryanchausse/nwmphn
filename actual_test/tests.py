@@ -35,7 +35,7 @@ class TestGetAClient(unittest.TestCase):
     def test_get_client(self):
         client_id = str(2)
         url = "http://127.0.0.1:8000/clients/" + client_id
-        
+
         expected_client_response = {
             "id": 2,
             "family_name": "Chausse",
@@ -53,7 +53,7 @@ class TestGetAClientThatDoesNotExist(unittest.TestCase):
     def test_get_client_that_does_not_exist(self):
         client_id = str(999)
         url = "http://127.0.0.1:8000/clients/" + client_id
-        
+
         expected_response_status_code = 404
 
         response = requests.get(url)
