@@ -7,7 +7,7 @@ import csv
 
 app = FastAPI()
 
-# Ran out of time to add the various constraints a la [constr(max_length=256)]
+# Ran out of time to add the various constraints (a la [constr(max_length=256)])
 class ClientModel(BaseModel):
     id: int
     client_key: uuid.uuid4
@@ -44,7 +44,18 @@ class ClientOutModel(BaseModel):
 
 
 # Read provided sample data into ClientModel(s) and append to list
-example_clients: list[ClientModel] = []
+# Add one test client (me)
+my_client = ClientModel(
+    "id": 1,
+    "client_key": str(uuid.uuid4()),
+    "slk": "LKE102310",
+    "forename": "Ryan",
+    "family_name": "Chausse",
+    "date_of_birth": "1986-01-01",
+    "intersex": 1,
+    "phone": "0418759273"
+)
+example_clients: list[ClientModel] = [my_client,]
 
 with open('./client_data.csv', newline='') as csvfile:
     csv_reader = csv.reader(csvfile)
@@ -95,7 +106,7 @@ def find_clients(
     forename: str | None = None,
     family_name: str | None = None,
     date_of_birth: datetime | None = None
-) -> list[ClientOutModel]: # Using ClientModel arbitrarily here
+) -> list[ClientOutModel]:
     if all(arg is None for arg in (id, forename, family_name, date_of_birth)):
         return example_clients # Likely needs pagination
 
@@ -124,5 +135,6 @@ def get_client(client_id: int):
 # Example: POST request to create a new resource (Client)
 @app.post("/clients", response_model=ClientOutModel, status_code=201)
 def create_thing(client: ClientModel):
+    print(client)
     example_clients.append(client)
     return client

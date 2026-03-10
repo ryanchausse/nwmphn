@@ -9,10 +9,10 @@ class TestCreateAClient(unittest.TestCase):
     def test_post_client(self):
         url = "http://127.0.0.1:8000/clients"
         client_to_create = {
-            "id": 1,
-            "client_key": uuid.uuid4(),
+            "id": 2,
+            "client_key": str(uuid.uuid4()),
             "slk": "LKE102310",
-            "forename": "Ryan",
+            "forename": "Bryan",
             "family_name": "Chausse",
             "date_of_birth": "1986-01-01",
             "intersex": 1,
@@ -20,9 +20,9 @@ class TestCreateAClient(unittest.TestCase):
         }
 
         expected_client_response = {
-            "id": 1,
+            "id": 2,
             "family_name": "Chausse",
-            "forename": "Ryan",
+            "forename": "Bryan",
             "phone": "0418759273",
         }
 
@@ -34,12 +34,12 @@ class TestCreateAClient(unittest.TestCase):
 class TestGetAClient(unittest.TestCase):
     def test_get_client(self):
         client_id = str(1)
-        url = "http://127.0.0.1:8000/clients" + client_id
+        url = "http://127.0.0.1:8000/clients/" + client_id
         
         expected_client_response = {
-            "id": 1,
+            "id": 2,
             "family_name": "Chausse",
-            "forename": "Ryan",
+            "forename": "Bryan",
             "phone": "0418759273",
         }
 
@@ -51,10 +51,10 @@ class TestGetAClient(unittest.TestCase):
 class TestGetAClientThatDoesNotExist(unittest.TestCase):
     def test_get_client_that_does_not_exist(self):
         client_id = str(999)
-        url = "http://127.0.0.1:8000/clients" + client_id
+        url = "http://127.0.0.1:8000/clients/" + client_id
         
         expected_response_status_code = 404
 
         response = requests.get(url)
 
-        self.assertEqual(response.status_code(), expected_response_status_code)
+        self.assertEqual(response.status_code, expected_response_status_code)
